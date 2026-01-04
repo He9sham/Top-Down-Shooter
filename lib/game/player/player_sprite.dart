@@ -20,6 +20,9 @@ class PlayerSpriteComponent extends SpriteComponent
   // World bounds (should match world size in WaveFallGame)
   static const double _worldHalfSize = 1000.0;
 
+  // Base Stats
+  static const double _baseDamage = 10.0;
+
   // Stats & Multipliers
   double _currentHealth = 100.0;
   double _maxHealth = 100.0;
@@ -119,7 +122,7 @@ class PlayerSpriteComponent extends SpriteComponent
       BulletSprite(
         direction: _lastDirection,
         position: position + bulletOffset,
-        damage: _damageMultiplier,
+        damage: _baseDamage * _damageMultiplier,
       ),
     );
   }
@@ -140,6 +143,15 @@ class PlayerSpriteComponent extends SpriteComponent
         ),
       );
     }
+  }
+
+  /// Reset player state
+  void reset() {
+    _currentHealth = _maxHealth;
+    _timeSinceLastShot = 0.0;
+    _timeSinceLastTrail = 0.0;
+    position = Vector2.zero();
+    _currentAngle = -pi / 2;
   }
 
   /// Take damage and trigger visual feedback

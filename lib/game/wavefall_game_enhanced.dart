@@ -10,11 +10,18 @@ import 'package:flutter_games/game/systems/collision_system.dart';
 import 'package:flutter_games/game/ui/hud.dart';
 import 'package:flutter_games/game/upgrades/upgrade.dart';
 import 'package:flutter_games/game/upgrades/upgrade_manager.dart';
+import 'package:flutter_games/game/utils/asset_generator.dart';
 import 'package:flutter_games/game/wavefall_game.dart';
+import 'package:flutter_games/game/weapons/bullet_sprite.dart';
+
+enum GameState { playing, paused, upgrading, gameOver }
 
 /// Enhanced WaveFall Game with visual assets and animations
 class WaveFallGameEnhanced extends WaveFallGame {
   WaveFallGameEnhanced();
+
+  GameState _gameState = GameState.playing;
+  GameState get gameState => _gameState;
 
   bool _isDebugMode = false;
 
@@ -39,18 +46,12 @@ class WaveFallGameEnhanced extends WaveFallGame {
   Color backgroundColor() => const Color(0xFF0a0a1a);
 
   @override
+  @mustCallSuper
   FutureOr<void> onLoad() async {
     _upgradeManager = UpgradeManager();
 
-    // Load all images at startup for better performance
-    await images.loadAll([
-      'player/player.png',
-      'enemies/enemy_basic.png',
-      'enemies/enemy_fast.png',
-      'enemies/enemy_tank.png',
-      'bullets/bullet.png',
-      'background/space_bg.png',
-    ]);
+    // Generate assets programmatically (Image as Code)
+    await AssetGenerator.generateAndLoad(this);
 
     // Add space background
     world.add(SpaceBackground(worldSize: Vector2(2000, 2000)));
@@ -91,11 +92,45 @@ class WaveFallGameEnhanced extends WaveFallGame {
     // Initial setup
     debugMode = _isDebugMode;
 
-    return super.onLoad();
+    // Do NOT call super.onLoad() as it loads the base game assets (duplicates)
+    // return super.onLoad();
+  }
+
+  void resetGame() {
+    // Clear enemies and bullets
+    world.children.whereType<EnemySprite>().forEach(
+      (e) => e.removeFromParent(),
+    );
+    world.children.whereType<BulletSprite>().forEach(
+      (b) => b.removeFromParent(),
+    ); // Assuming BulletSprite exists
+
+    // Reset player
+    if (player is PlayerSpriteComponent) {
+      (player as PlayerSpriteComponent).reset();
+    }
+
+    // Reset Wave
+    _currentWave = 1;
+    _waveTimer = 0.0;
+
+    // Reset State
+    changeState(GameState.playing);
+    _spawnWave();
   }
 
   @override
   void update(double dt) {
+    // Only update game logic if playing
+    if (_gameState != GameState.playing) return;
+
+    // Check Player Health for Game Over
+    if (player is PlayerSpriteComponent &&
+        (player as PlayerSpriteComponent).currentHealth <= 0) {
+      changeState(GameState.gameOver);
+      return;
+    }
+
     super.update(dt);
 
     // Wave management
@@ -157,23 +192,57 @@ class WaveFallGameEnhanced extends WaveFallGame {
 
     // Show upgrade menu every 3 waves
     if (_currentWave % 3 == 0) {
-      showUpgradeMenu();
+      changeState(GameState.upgrading);
     } else {
       _spawnWave();
     }
   }
 
-  void showUpgradeMenu() {
-    pauseEngine();
-    currentUpgradeOptions = _upgradeManager.getRandomUpgrades(3);
-    overlays.add('UpgradeMenu');
+  /// variable to handle menu overlays based on game state
+  void changeState(GameState newState) {
+    if (_gameState == newState) return;
+
+    // 1. Exit current state (Cleanup)
+    switch (_gameState) {
+      case GameState.playing:
+        pauseEngine();
+        break;
+      case GameState.paused:
+        overlays.remove('PauseMenu');
+        break;
+      case GameState.upgrading:
+        overlays.remove('UpgradeMenu');
+        currentUpgradeOptions.clear();
+        break;
+      case GameState.gameOver:
+        overlays.remove('GameOverMenu');
+        break;
+    }
+
+    // Update state
+    _gameState = newState;
+
+    // 2. Enter new state (Setup)
+    switch (_gameState) {
+      case GameState.playing:
+        resumeEngine();
+        break;
+      case GameState.paused:
+        overlays.add('PauseMenu');
+        break;
+      case GameState.upgrading:
+        currentUpgradeOptions = _upgradeManager.getRandomUpgrades(3);
+        overlays.add('UpgradeMenu');
+        break;
+      case GameState.gameOver:
+        overlays.add('GameOverMenu');
+        break;
+    }
   }
 
   void selectUpgrade(Upgrade upgrade) {
     _upgradeManager.applyUpgrade(player, upgrade);
-    overlays.remove('UpgradeMenu');
-    currentUpgradeOptions.clear();
-    resumeEngine();
+    changeState(GameState.playing);
     _spawnWave();
   }
 }

@@ -19,11 +19,16 @@ class CollisionSystem extends Component with HasGameReference<WaveFallGame> {
   }
 
   void _checkBulletEnemyCollisions() {
-    final bullets = game.world.children.query<BulletSprite>();
-    final enemies = game.world.children.query<EnemySprite>();
+    // robust query to get all active bullets and enemies
+    final bullets = game.world.children.whereType<BulletSprite>().toList();
+    final enemies = game.world.children.whereType<EnemySprite>().toList();
 
     for (final bullet in bullets) {
+      if (bullet.parent == null) continue; // Already removed
+
       for (final enemy in enemies) {
+        if (enemy.parent == null) continue; // Already removed
+
         if (_isColliding(bullet, enemy)) {
           // Apply damage to enemy
           enemy.takeDamage(bullet.getDamage());
@@ -69,10 +74,11 @@ class CollisionSystem extends Component with HasGameReference<WaveFallGame> {
   }
 
   bool _isColliding(PositionComponent a, PositionComponent b) {
-    // Simple circle collision detection
+    // Simple circle collision detection with buffer
     final distance = a.position.distanceTo(b.position);
     final radiusA = a.size.x / 2;
     final radiusB = b.size.x / 2;
-    return distance < (radiusA + radiusB);
+    return distance <
+        (radiusA + radiusB + 10.0); // 10.0 buffer for cleaner hits
   }
 }

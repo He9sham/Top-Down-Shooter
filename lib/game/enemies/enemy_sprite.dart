@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_games/game/effects/particle_effects.dart';
 import 'package:flutter_games/game/wavefall_game.dart';
@@ -68,7 +69,6 @@ class EnemySprite extends SpriteComponent with HasGameReference<WaveFallGame> {
     super.update(dt);
 
     // AI: Chase player
-    // AI: Chase player
     final player = game.player;
 
     final direction = (player.position - position).normalized();
@@ -91,6 +91,15 @@ class EnemySprite extends SpriteComponent with HasGameReference<WaveFallGame> {
   /// Take damage from bullet
   void takeDamage(double damage) {
     _currentHealth -= damage;
+
+    // Visual feedback: Flash white
+    add(
+      ColorEffect(
+        Colors.white,
+        EffectController(duration: 0.1, alternate: true, repeatCount: 1),
+        opacityTo: 0.8,
+      )..removeOnFinish = true,
+    );
 
     // Spawn hit particle effect
     game.world.add(
