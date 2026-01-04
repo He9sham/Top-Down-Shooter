@@ -27,6 +27,8 @@ class WaveFallGameEnhanced extends WaveFallGame {
 
   // Upgrade System
   late final UpgradeManager _upgradeManager;
+  @override
+  // ignore: overridden_fields
   List<Upgrade> currentUpgradeOptions = [];
 
   // HUD
@@ -37,6 +39,7 @@ class WaveFallGameEnhanced extends WaveFallGame {
   int _enemiesRemaining = 0;
   double _waveTimer = 0.0;
 
+  @override
   void toggleDebugMode() {
     _isDebugMode = !_isDebugMode;
     debugMode = _isDebugMode;
@@ -240,6 +243,7 @@ class WaveFallGameEnhanced extends WaveFallGame {
     }
   }
 
+  @override
   void selectUpgrade(Upgrade upgrade) {
     _upgradeManager.applyUpgrade(player, upgrade);
     changeState(GameState.playing);

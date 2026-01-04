@@ -99,8 +99,12 @@ class PlayerSpriteComponent extends SpriteComponent
   }
 
   double _normalizeAngle(double angle) {
-    while (angle > pi) angle -= 2 * pi;
-    while (angle < -pi) angle += 2 * pi;
+    while (angle > pi) {
+      angle -= 2 * pi;
+    }
+    while (angle < -pi) {
+      angle += 2 * pi;
+    }
     return angle;
   }
 

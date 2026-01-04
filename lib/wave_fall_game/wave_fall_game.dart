@@ -24,21 +24,21 @@ class WaveFallGame extends FlameGame {
 
   @override
   FutureOr<void> onLoad() async {
-    // TODO: Player System
+    
     // - Create Player component
     // - Add movement controls (Joystick or Keyboard)
     // - Implement shooting mechanics
 
-    // TODO: Enemy System
+   
     // - Create basic Enemy component
     // - Implement enemy AI (chase player)
     // - Add enemy spawning logic
 
-    // TODO: Wave System
+   
     // - Create WaveManager
     // - Track current wave, remaining enemies, spawn rates
 
-    // TODO: UI / HUD
+    
     // - Health bar
     // - Score display
     // - Wave counter
@@ -82,16 +82,16 @@ class WaveFallGame extends FlameGame {
     return super.onLoad();
   }
 
-  @override
-  void update(double dt) {
-    super.update(dt);
-    // Game logic updates usually go into components,
-    // but global managers can be updated here.
-  }
+  // @override
+  // void update(double dt) {
+  //   super.update(dt);
+  //   // Game logic updates usually go into components,
+  //   // but global managers can be updated here.
+  // }
 
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    // Custom global rendering if needed
-  }
+  // @override
+  // void render(Canvas canvas) {
+  //   super.render(canvas);
+  //   // Custom global rendering if needed
+  // }
 }

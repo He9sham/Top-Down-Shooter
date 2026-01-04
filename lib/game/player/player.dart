@@ -22,9 +22,9 @@ class PlayerComponent extends CircleComponent
   static const double _worldHalfSize = 1000.0;
 
   // Stats & Multipliers
-  double _currentHealth = 100.0;
+  double currentHealth = 100.0;
   double _maxHealth = 100.0;
-  double _damageMultiplier = 1.0;
+  double damageMultiplier = 1.0;
   double _fireRateMultiplier = 1.0;
   double _speedMultiplier = 1.0;
 
@@ -86,7 +86,7 @@ class PlayerComponent extends CircleComponent
   void upgradeHealth(double percent) {
     final increase = _maxHealth * percent;
     _maxHealth += increase;
-    _currentHealth += increase;
+    currentHealth += increase;
   }
 
   void upgradeSpeed(double percent) {
@@ -94,7 +94,7 @@ class PlayerComponent extends CircleComponent
   }
 
   void upgradeDamage(double percent) {
-    _damageMultiplier += percent;
+    damageMultiplier += percent;
   }
 
   void upgradeFireRate(double percent) {
