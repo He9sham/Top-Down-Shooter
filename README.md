@@ -1,16 +1,48 @@
-# flutter_games
+# 🎮 WAVEFALL — Top-Down Shooter (Flutter + Flame)
 
-A new Flutter project.
+**WAVEFALL** is a fast-paced 2D top-down shooter built with **Flutter** and **Flame**.  
+The goal is simple: **survive endless enemy waves**, upgrade your abilities, and push your limits.
 
-## Getting Started
+Designed with **clean architecture**, **mobile performance**, and **scalability** in mind.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 🚀 Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- 🔫 Top-Down Shooter gameplay
+- 🌊 Endless wave-based enemy system
+- 📈 Progressive difficulty scaling
+- ⚡ Upgrade system between waves
+- 🎮 Mobile-friendly joystick controls
+- 💥 Collision & damage system
+- 🧠 Clean, modular game architecture
+- 📱 Optimized for mobile performance
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 🧩 Tech Stack
+
+| Layer | Technology |
+|------|-----------|
+| Game Engine | Flame |
+| UI | Flutter Widgets |
+| State | ValueNotifier / Riverpod (optional) |
+| Physics | Flame Collision System |
+| Audio | Flame Audio |
+
+---
+
+## 📁 Project Structure
+
+```text
+lib/
+├── game/
+│   ├── wavefall_game.dart
+│   ├── config/
+│   ├── player/
+│   ├── enemies/
+│   ├── weapons/
+│   ├── systems/
+│   ├── upgrades/
+│   └── ui/
+└── main.dart
