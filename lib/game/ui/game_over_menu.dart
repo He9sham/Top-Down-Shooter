@@ -126,6 +126,22 @@ class GameOverMenu extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
+                // Exit Button
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'EXIT TO HOME',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
