@@ -32,6 +32,18 @@ Designed with **clean architecture**, **mobile performance**, and **scalability*
 
 ---
 
+## Architecture Philosophy
+
+This project follows a modular, system-oriented architecture:
+- Game logic isolated from UI
+- Scalable systems (waves, upgrades, enemies)
+- Mobile-first performance decisions
+
+Designed for maintainability and interview discussion.
+
+
+---
+
 ## 📁 Project Structure
 
 ```text
