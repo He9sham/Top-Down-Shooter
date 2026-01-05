@@ -5,6 +5,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_games/game/components/background.dart';
 import 'package:flutter_games/game/enemies/enemy_sprite.dart';
+import 'package:flutter_games/game/game_enums.dart';
 import 'package:flutter_games/game/player/player_sprite.dart';
 import 'package:flutter_games/game/systems/collision_system.dart';
 import 'package:flutter_games/game/ui/hud.dart';
@@ -13,8 +14,6 @@ import 'package:flutter_games/game/upgrades/upgrade_manager.dart';
 import 'package:flutter_games/game/utils/asset_generator.dart';
 import 'package:flutter_games/game/wavefall_game.dart';
 import 'package:flutter_games/game/weapons/bullet_sprite.dart';
-
-enum GameState { playing, paused, upgrading, gameOver }
 
 /// Enhanced WaveFall Game with visual assets and animations
 class WaveFallGameEnhanced extends WaveFallGame {
@@ -36,6 +35,7 @@ class WaveFallGameEnhanced extends WaveFallGame {
 
   // Wave System (basic implementation)
   int _currentWave = 1;
+  int get currentWave => _currentWave;
   int _enemiesRemaining = 0;
   double _waveTimer = 0.0;
 

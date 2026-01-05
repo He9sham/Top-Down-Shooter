@@ -40,11 +40,14 @@ class UpgradeMenu extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: upgrades.map((upgrade) {
-                  return _buildUpgradeCard(context, upgrade);
-                }).toList(),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: upgrades.map((upgrade) {
+                    return _buildUpgradeCard(context, upgrade);
+                  }).toList(),
+                ),
               ),
             ),
           ],

@@ -1,5 +1,7 @@
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_games/game/game_enums.dart';
 import 'package:flutter_games/game/player/player_sprite.dart';
 import 'package:flutter_games/game/wavefall_game.dart';
 
@@ -11,6 +13,7 @@ class GameHud extends PositionComponent with HasGameReference<WaveFallGame> {
   late TextComponent _waveText;
   late RectangleComponent _healthBarBackground;
   late RectangleComponent _healthBarFill;
+  late PauseButton _pauseButton;
 
   static const double _barWidth = 200.0;
   static const double _barHeight = 20.0;
@@ -22,6 +25,15 @@ class GameHud extends PositionComponent with HasGameReference<WaveFallGame> {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+
+    // Pause Button
+    // We position it based on the game size (viewport size)
+    // Since GameHud is added to the viewport, we can access game.camera.viewport.virtualSize or similar.
+    // Ideally we want it top-right.
+    final viewportWidth = game.camera.viewport.size.x;
+    _pauseButton = PauseButton()
+      ..position = Vector2(viewportWidth - 60, _padding);
+    add(_pauseButton);
 
     // Health bar background
     _healthBarBackground = RectangleComponent(
@@ -133,5 +145,38 @@ class GameHud extends PositionComponent with HasGameReference<WaveFallGame> {
   void updateWave(int wave, int enemies) {
     currentWave = wave;
     enemiesRemaining = enemies;
+  }
+}
+
+class PauseButton extends PositionComponent
+    with TapCallbacks, HasGameReference<WaveFallGame> {
+  PauseButton() : super(size: Vector2(40, 40), anchor: Anchor.topRight);
+
+  @override
+  void render(Canvas canvas) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    // Draw pause icon (two vertical bars)
+    canvas.drawRect(Rect.fromLTWH(10, 10, 6, 20), paint);
+    canvas.drawRect(Rect.fromLTWH(24, 10, 6, 20), paint);
+
+    // Draw border
+    final borderPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawRect(Rect.fromLTWH(0, 0, width, height), borderPaint);
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    try {
+      // ignore: avoid_dynamic_calls
+      (game as dynamic).changeState(GameState.paused);
+    } catch (e) {
+      debugPrint('Error pausing game: $e');
+    }
   }
 }

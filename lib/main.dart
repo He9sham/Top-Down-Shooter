@@ -22,7 +22,7 @@ class GameApp extends StatelessWidget {
         body: GameWidget<WaveFallGameEnhanced>(
           game: WaveFallGameEnhanced(),
           overlayBuilderMap: {
-            'PauseMenu': (context, game) => const PauseMenu(),
+            'PauseMenu': (context, game) => PauseMenu(game: game),
             'UpgradeMenu': (context, game) => UpgradeMenu(game: game),
             'GameOverMenu': (context, game) => GameOverMenu(game: game),
           },
