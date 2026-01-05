@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_games/game/components/background.dart';
+import 'package:flutter_games/game/enemies/boss_enemy.dart';
+import 'package:flutter_games/game/enemies/enemy.dart';
 import 'package:flutter_games/game/enemies/enemy_sprite.dart';
 import 'package:flutter_games/game/game_enums.dart';
 import 'package:flutter_games/game/player/player_sprite.dart';
@@ -139,8 +141,8 @@ class WaveFallGameEnhanced extends WaveFallGame {
     // Wave management
     _waveTimer += dt;
 
-    // Count remaining enemies
-    _enemiesRemaining = world.children.query<EnemySprite>().length;
+    // Count remaining enemies (any subclass of Enemy)
+    _enemiesRemaining = world.children.whereType<Enemy>().length;
 
     // Update HUD
     _hud.updateWave(_currentWave, _enemiesRemaining);
@@ -154,12 +156,24 @@ class WaveFallGameEnhanced extends WaveFallGame {
   void _spawnWave() {
     _waveTimer = 0.0;
 
-    // Spawn enemies based on wave number
+    // Boss Wave every 5 waves
+    if (_currentWave % 5 == 0) {
+      _spawnBoss();
+      return;
+    }
+
+    // Spawn regular enemies based on wave number
     final enemyCount = 5 + (_currentWave * 2);
 
     for (int i = 0; i < enemyCount; i++) {
       _spawnEnemy();
     }
+  }
+
+  void _spawnBoss() {
+    // Spawn boss at a distance
+    final spawnPos = player.position + Vector2(0, -500);
+    world.add(BossEnemy(position: spawnPos));
   }
 
   void _spawnEnemy() {

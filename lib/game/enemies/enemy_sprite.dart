@@ -2,19 +2,33 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_games/game/effects/particle_effects.dart';
+import 'package:flutter_games/game/enemies/enemy.dart';
 import 'package:flutter_games/game/wavefall_game.dart';
 
 /// Enemy type enumeration
 enum EnemyType { basic, fast, tank }
 
 /// Base enemy component with sprite and AI
-class EnemySprite extends SpriteComponent with HasGameReference<WaveFallGame> {
+class EnemySprite extends Enemy with HasGameReference<WaveFallGame> {
   EnemySprite({required this.enemyType, required Vector2 position})
-    : super(position: position, anchor: Anchor.center) {
+    : super(
+        position: position,
+        anchor: Anchor.center,
+        size: Vector2(
+          32,
+          32,
+        ), // Default size, will be updated in _initializeStats
+      ) {
     _initializeStats();
   }
 
   final EnemyType enemyType;
+  @override
+  double get maxHealth => _maxHealth;
+  @override
+  double get currentHealth => _currentHealth;
+  @override
+  double getDamage() => _damage;
 
   // Stats based on type
   late double _maxHealth;
@@ -89,6 +103,7 @@ class EnemySprite extends SpriteComponent with HasGameReference<WaveFallGame> {
   }
 
   /// Take damage from bullet
+  @override
   void takeDamage(double damage) {
     _currentHealth -= damage;
 
@@ -128,10 +143,4 @@ class EnemySprite extends SpriteComponent with HasGameReference<WaveFallGame> {
     // Remove enemy
     removeFromParent();
   }
-
-  /// Get damage value for collision with player
-  double getDamage() => _damage;
-
-  /// Get health percentage for UI
-  double get healthPercentage => _currentHealth / _maxHealth;
 }
