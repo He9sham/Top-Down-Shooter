@@ -24,17 +24,17 @@ class UpgradeManager {
     Upgrade(
       id: 'damage_1',
       name: 'Bullet Damage',
-      description: 'Increases bullet damage by 25%',
+      description: 'Increases bullet damage by 20%',
       type: UpgradeType.damage,
-      value: 0.25, // +25%
+      value: 0.2, // +20%
       icon: Icons.dangerous,
     ),
     Upgrade(
       id: 'fire_rate_1',
       name: 'Fire Rate',
-      description: 'Increases fire rate by 15%',
+      description: 'Increases fire rate by 25%',
       type: UpgradeType.fireRate,
-      value: 0.15, // +15% frequency (or -15% interval)
+      value: 0.25, // +25% frequency (or -25% interval)
       icon: Icons.timer_off,
     ),
   ];

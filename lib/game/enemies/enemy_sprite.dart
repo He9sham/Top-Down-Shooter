@@ -10,19 +10,21 @@ enum EnemyType { basic, fast, tank }
 
 /// Base enemy component with sprite and AI
 class EnemySprite extends Enemy with HasGameReference<WaveFallGame> {
-  EnemySprite({required this.enemyType, required Vector2 position})
-    : super(
-        position: position,
-        anchor: Anchor.center,
-        size: Vector2(
-          32,
-          32,
-        ), // Default size, will be updated in _initializeStats
-      ) {
+  EnemySprite({
+    required this.enemyType,
+    required Vector2 position,
+    this.healthMultiplier = 1.0,
+    this.speedMultiplier = 1.0,
+    this.damageMultiplier = 1.0,
+  }) : super(position: position, anchor: Anchor.center, size: Vector2(32, 32)) {
     _initializeStats();
   }
 
   final EnemyType enemyType;
+  final double healthMultiplier;
+  final double speedMultiplier;
+  final double damageMultiplier;
+
   @override
   double get maxHealth => _maxHealth;
   @override
@@ -42,25 +44,25 @@ class EnemySprite extends Enemy with HasGameReference<WaveFallGame> {
   void _initializeStats() {
     switch (enemyType) {
       case EnemyType.basic:
-        _maxHealth = 30.0;
-        _speed = 100.0;
-        _damage = 10.0;
+        _maxHealth = 30.0 * healthMultiplier;
+        _speed = 100.0 * speedMultiplier;
+        _damage = 10.0 * damageMultiplier;
         _size = Vector2(32, 32);
         _spritePath = 'enemies/enemy_basic.png';
         _particleColor = Colors.green;
         break;
       case EnemyType.fast:
-        _maxHealth = 15.0;
-        _speed = 180.0;
-        _damage = 5.0;
+        _maxHealth = 15.0 * healthMultiplier;
+        _speed = 180.0 * speedMultiplier;
+        _damage = 5.0 * damageMultiplier;
         _size = Vector2(28, 28);
         _spritePath = 'enemies/enemy_fast.png';
         _particleColor = Colors.red;
         break;
       case EnemyType.tank:
-        _maxHealth = 80.0;
-        _speed = 60.0;
-        _damage = 20.0;
+        _maxHealth = 80.0 * healthMultiplier;
+        _speed = 60.0 * speedMultiplier;
+        _damage = 20.0 * damageMultiplier;
         _size = Vector2(48, 48);
         _spritePath = 'enemies/enemy_tank.png';
         _particleColor = Colors.purple;

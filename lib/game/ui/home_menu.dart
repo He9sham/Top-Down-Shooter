@@ -60,7 +60,6 @@ class HomeMenu extends StatelessWidget {
                 icon: Icons.save_rounded,
                 color: Colors.purpleAccent,
                 onTap: () {
-                  // TODO: Implement load game
                 },
               ),
               const SizedBox(height: 20),
@@ -70,7 +69,7 @@ class HomeMenu extends StatelessWidget {
                 icon: Icons.layers_rounded,
                 color: Colors.orangeAccent,
                 onTap: () {
-                  // TODO: Implement levels
+                  
                 },
               ),
               const Spacer(flex: 2),

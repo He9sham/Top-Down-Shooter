@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_games/game/components/background.dart';
 import 'package:flutter_games/game/enemies/boss_enemy.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_games/game/upgrades/upgrade_manager.dart';
 import 'package:flutter_games/game/utils/asset_generator.dart';
 import 'package:flutter_games/game/wavefall_game.dart';
 import 'package:flutter_games/game/weapons/bullet_sprite.dart';
+import 'package:flutter_games/game/weapons/enemy_bullet.dart';
 
 /// Enhanced WaveFall Game with visual assets and animations
 class WaveFallGameEnhanced extends WaveFallGame {
@@ -35,11 +37,24 @@ class WaveFallGameEnhanced extends WaveFallGame {
   // HUD
   late final GameHud _hud;
 
-  // Wave System (basic implementation)
+  // Wave System
   int _currentWave = 1;
   int get currentWave => _currentWave;
   int _enemiesRemaining = 0;
   double _waveTimer = 0.0;
+
+  // Wave state management
+  bool _isWaveActive = false;
+  double _waveCooldownTimer = 0.0;
+  static const double _timeBetweenWaves = 3.0;
+
+  // Performance Clamps
+  static const int _maxEnemies = 50;
+  static const int _maxPlayerBullets = 150;
+  static const int _maxEnemyBullets = 75;
+
+  // Time Scale for slow-motion effect
+  double _timeScale = 1.0;
 
   @override
   void toggleDebugMode() {
@@ -91,8 +106,8 @@ class WaveFallGameEnhanced extends WaveFallGame {
     _hud = GameHud();
     camera.viewport.add(_hud);
 
-    // Spawn initial enemies
-    _spawnWave();
+    // Start first wave after a short delay
+    _startWaveCooldown();
 
     // Initial setup
     debugMode = _isDebugMode;
@@ -102,13 +117,16 @@ class WaveFallGameEnhanced extends WaveFallGame {
   }
 
   void resetGame() {
+    _timeScale = 1.0;
+
     // Clear enemies and bullets
-    world.children.whereType<EnemySprite>().forEach(
-      (e) => e.removeFromParent(),
-    );
+    world.children.whereType<Enemy>().forEach((e) => e.removeFromParent());
     world.children.whereType<BulletSprite>().forEach(
       (b) => b.removeFromParent(),
-    ); // Assuming BulletSprite exists
+    );
+    world.children.whereType<EnemyBullet>().forEach(
+      (b) => b.removeFromParent(),
+    );
 
     // Reset player
     if (player is PlayerSpriteComponent) {
@@ -118,43 +136,124 @@ class WaveFallGameEnhanced extends WaveFallGame {
     // Reset Wave
     _currentWave = 1;
     _waveTimer = 0.0;
+    _isWaveActive = false;
 
     // Reset State
     changeState(GameState.playing);
-    _spawnWave();
+    _startWaveCooldown();
   }
 
   @override
   void update(double dt) {
     // Only update game logic if playing
-    if (_gameState != GameState.playing) return;
+    if (_gameState != GameState.playing) {
+      // Allow minor slow-mo update during death even if state is technically gameOver
+      if (_gameState == GameState.gameOver && _timeScale < 1.0) {
+        _updateSlowMo(dt);
+      }
+      return;
+    }
+
+    final scaledDt = dt * _timeScale;
 
     // Check Player Health for Game Over
     if (player is PlayerSpriteComponent &&
         (player as PlayerSpriteComponent).currentHealth <= 0) {
-      changeState(GameState.gameOver);
+      _triggerPlayerDeath();
       return;
     }
 
-    super.update(dt);
+    super.update(scaledDt);
 
     // Wave management
-    _waveTimer += dt;
+    if (_isWaveActive) {
+      _waveTimer += scaledDt;
+      _enemiesRemaining = world.children.whereType<Enemy>().length;
 
-    // Count remaining enemies (any subclass of Enemy)
-    _enemiesRemaining = world.children.whereType<Enemy>().length;
+      if (_enemiesRemaining == 0 && _waveTimer > 2.0) {
+        _isWaveActive = false;
+        _nextWave();
+      }
+    } else {
+      _waveCooldownTimer -= dt; // Real time cooldown
+      if (_waveCooldownTimer <= 0) {
+        _spawnWave();
+      }
+    }
 
     // Update HUD
     _hud.updateWave(_currentWave, _enemiesRemaining);
 
-    // Check if wave is complete
-    if (_enemiesRemaining == 0 && _waveTimer > 5.0) {
-      _nextWave();
+    // Performance: Clamp Bullets
+    _clampProjectiles();
+  }
+
+  void _triggerPlayerDeath() {
+    // Start slow motion effect
+    _timeScale = 0.2;
+
+    // Switch to game over after a delay
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (_gameState == GameState.playing) {
+        changeState(GameState.gameOver);
+      }
+    });
+  }
+
+  void _updateSlowMo(double dt) {
+    // Optional: add any visual updates for slow-mo here
+  }
+
+  void _clampProjectiles() {
+    final playerBullets = world.children.whereType<BulletSprite>().toList();
+    if (playerBullets.length > _maxPlayerBullets) {
+      playerBullets.first.removeFromParent();
     }
+
+    final enemyBullets = world.children.whereType<EnemyBullet>().toList();
+    if (enemyBullets.length > _maxEnemyBullets) {
+      enemyBullets.first.removeFromParent();
+    }
+  }
+
+  void _startWaveCooldown() {
+    _isWaveActive = false;
+    _waveCooldownTimer = _timeBetweenWaves;
+
+    // Show wave announcement message
+    _showWaveAnnouncement();
+  }
+
+  void _showWaveAnnouncement() {
+    final text = TextComponent(
+      text: 'WAVE $_currentWave INCOMING',
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 4,
+          shadows: [Shadow(color: Colors.cyan, blurRadius: 10)],
+        ),
+      ),
+      position: Vector2(camera.viewport.size.x / 2, camera.viewport.size.y / 3),
+      anchor: Anchor.center,
+    );
+
+    camera.viewport.add(text);
+
+    // Fade out and remove
+    text.add(
+      OpacityEffect.fadeOut(EffectController(duration: 3.0))
+        ..onComplete = () => text.removeFromParent(),
+    );
+
+    text.add(ScaleEffect.by(Vector2.all(1.2), EffectController(duration: 3.0)));
   }
 
   void _spawnWave() {
     _waveTimer = 0.0;
+    _isWaveActive = true;
 
     // Boss Wave every 5 waves
     if (_currentWave % 5 == 0) {
@@ -162,56 +261,91 @@ class WaveFallGameEnhanced extends WaveFallGame {
       return;
     }
 
-    // Spawn regular enemies based on wave number
-    final enemyCount = 5 + (_currentWave * 2);
+    // --- CURVED SCALING ---
+    // Count scales exponentially but starts slow: 5, 8, 12, 16, 21...
+    final enemyCount = (5 + 1.2 * pow(_currentWave, 1.4)).toInt().clamp(
+      5,
+      _maxEnemies,
+    );
+
+    // Stat multipliers
+    final healthMultiplier =
+        1.0 + 0.15 * pow(_currentWave - 1, 1.1); // Health scales faster
+    final speedMultiplier = (1.0 + 0.1 * log(_currentWave)).clamp(
+      1.0,
+      1.6,
+    ); // Speed scales slower & capped
+    final damageMultiplier = 1.0 + 0.1 * (_currentWave / 2);
 
     for (int i = 0; i < enemyCount; i++) {
-      _spawnEnemy();
+      _spawnEnemy(healthMultiplier, speedMultiplier, damageMultiplier);
     }
   }
 
   void _spawnBoss() {
-    // Spawn boss at a distance
     final spawnPos = player.position + Vector2(0, -500);
-    world.add(BossEnemy(position: spawnPos));
+    // Boss scales its own health and damage internally based on wave
+    world.add(BossEnemy(position: spawnPos, waveNumber: _currentWave));
   }
 
-  void _spawnEnemy() {
+  void _spawnEnemy(double healthMult, double speedMult, double damageMult) {
     // Random position around the player
-    final angle = (world.children.length * 0.5) % (2 * 3.14159);
-    final distance = 400.0 + (world.children.length % 3) * 100;
+    final rand = Random();
+    final angle = rand.nextDouble() * 2 * pi;
+    final distance = 500.0 + rand.nextDouble() * 200.0;
 
     final spawnPos =
-        player.position + Vector2(distance * cos(angle), distance * sin(angle));
+        player.position + Vector2(cos(angle), sin(angle)) * distance;
 
-    // Determine enemy type based on wave
+    // --- WAVE COMPOSITION ---
     EnemyType type;
+    final roll = rand.nextDouble();
+
     if (_currentWave < 3) {
+      // Early: 100% Basic
       type = EnemyType.basic;
     } else if (_currentWave < 6) {
-      type = (world.children.length % 2 == 0)
-          ? EnemyType.basic
-          : EnemyType.fast;
+      // Mid: 70% Basic, 30% Fast
+      type = roll < 0.7 ? EnemyType.basic : EnemyType.fast;
+    } else if (_currentWave < 10) {
+      // Late: 50% Basic, 35% Fast, 15% Tank
+      if (roll < 0.5) {
+        type = EnemyType.basic;
+      } else if (roll < 0.85) {
+        type = EnemyType.fast;
+      } else {
+        type = EnemyType.tank;
+      }
     } else {
-      final rand = world.children.length % 3;
-      type = rand == 0
-          ? EnemyType.basic
-          : rand == 1
-          ? EnemyType.fast
-          : EnemyType.tank;
+      // End-game: 30% Basic, 40% Fast, 30% Tank
+      if (roll < 0.3) {
+        type = EnemyType.basic;
+      } else if (roll < 0.7) {
+        type = EnemyType.fast;
+      } else {
+        type = EnemyType.tank;
+      }
     }
 
-    world.add(EnemySprite(enemyType: type, position: spawnPos));
+    world.add(
+      EnemySprite(
+        enemyType: type,
+        position: spawnPos,
+        healthMultiplier: healthMult,
+        speedMultiplier: speedMult,
+        damageMultiplier: damageMult,
+      ),
+    );
   }
 
   void _nextWave() {
     _currentWave++;
 
     // Show upgrade menu every 3 waves
-    if (_currentWave % 3 == 0) {
+    if ((_currentWave - 1) % 3 == 0) {
       changeState(GameState.upgrading);
     } else {
-      _spawnWave();
+      _startWaveCooldown();
     }
   }
 

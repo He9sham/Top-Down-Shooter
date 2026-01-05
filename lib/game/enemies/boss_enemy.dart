@@ -9,18 +9,39 @@ import 'package:flutter_games/game/wavefall_game.dart';
 import 'package:flutter_games/game/weapons/enemy_bullet.dart';
 
 class BossEnemy extends Enemy with HasGameReference<WaveFallGame> {
-  BossEnemy({required Vector2 position})
-    : super(position: position, size: Vector2(120, 120));
+  BossEnemy({required Vector2 position, required this.waveNumber})
+    : super(position: position, size: Vector2(120, 120)) {
+    _initializeStats();
+  }
+
+  final int waveNumber;
 
   @override
-  double get maxHealth => 500.0; // 10x normal enemy (basic is 30)
+  double get maxHealth => _maxHealth;
 
-  double _currentHealth = 500.0;
+  late double _maxHealth;
+  late double _currentHealth;
+
   @override
   double get currentHealth => _currentHealth;
 
-  final double _baseSpeed = 40.0; // Slower movement
+  double _baseSpeed = 40.0;
   double _currentSpeed = 40.0;
+  late double _bulletDamage;
+
+  void _initializeStats() {
+    // Scaling: 500 base + 250 for every boss cycle (waves 5, 10, 15...)
+    final bossIndex = (waveNumber / 5).floor();
+    _maxHealth = 500.0 + (bossIndex - 1) * 300.0;
+    _currentHealth = _maxHealth;
+
+    // Damage scales slightly
+    _bulletDamage = 10.0 + (bossIndex - 1) * 5.0;
+
+    // Speed increases slightly to prevent boss being too easy late game
+    _baseSpeed = 40.0 + (bossIndex - 1) * 10.0;
+    _currentSpeed = _baseSpeed;
+  }
 
   // Timers for behaviors
   late Timer _attackTimer;
@@ -70,7 +91,7 @@ class BossEnemy extends Enemy with HasGameReference<WaveFallGame> {
           position: position.clone(),
           direction: direction,
           speed: 150,
-          damage: 10,
+          damage: _bulletDamage,
         ),
       );
     }
@@ -141,5 +162,5 @@ class BossEnemy extends Enemy with HasGameReference<WaveFallGame> {
   }
 
   @override
-  double getDamage() => 30.0;
+  double getDamage() => 30.0 + (waveNumber / 5) * 10;
 }
