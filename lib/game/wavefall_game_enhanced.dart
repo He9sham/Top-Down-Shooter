@@ -19,6 +19,33 @@ import 'package:flutter_games/game/wavefall_game.dart';
 import 'package:flutter_games/game/weapons/bullet_sprite.dart';
 import 'package:flutter_games/game/weapons/enemy_bullet.dart';
 
+/// A TextComponent that supports opacity effects
+class FadingTextComponent extends TextComponent
+    with HasPaint
+    implements OpacityProvider {
+  FadingTextComponent({
+    required super.text,
+    required super.textRenderer,
+    required super.position,
+    required super.anchor,
+  });
+
+  @override
+  double get opacity => paint.color.opacity;
+
+  @override
+  set opacity(double value) {
+    paint.color = paint.color.withOpacity(value);
+    // Also update the text renderer if it's a TextPaint to ensure the text actually fades
+    if (textRenderer is TextPaint) {
+      final style = (textRenderer as TextPaint).style;
+      textRenderer = TextPaint(
+        style: style.copyWith(color: style.color?.withOpacity(value)),
+      );
+    }
+  }
+}
+
 /// Enhanced WaveFall Game with visual assets and animations
 class WaveFallGameEnhanced extends WaveFallGame {
   WaveFallGameEnhanced();
@@ -90,21 +117,21 @@ class WaveFallGameEnhanced extends WaveFallGame {
     );
 
     // Add joystick to viewport (HUD)
-    camera.viewport.add(joystick);
+    await camera.viewport.add(joystick);
 
     // Player with sprite
     player = PlayerSpriteComponent(joystick: joystick);
-    world.add(player);
+    await world.add(player);
 
     // Camera follow
     camera.follow(player);
 
     // Add collision system
-    world.add(CollisionSystem());
+    await world.add(CollisionSystem());
 
     // Add HUD to viewport
     _hud = GameHud();
-    camera.viewport.add(_hud);
+    await camera.viewport.add(_hud);
 
     // Start first wave after a short delay
     _startWaveCooldown();
@@ -225,7 +252,7 @@ class WaveFallGameEnhanced extends WaveFallGame {
   }
 
   void _showWaveAnnouncement() {
-    final text = TextComponent(
+    final text = FadingTextComponent(
       text: 'WAVE $_currentWave INCOMING',
       textRenderer: TextPaint(
         style: const TextStyle(
