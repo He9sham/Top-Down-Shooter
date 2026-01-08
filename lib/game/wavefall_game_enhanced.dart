@@ -269,13 +269,27 @@ class WaveFallGameEnhanced extends WaveFallGame {
 
     camera.viewport.add(text);
 
-    // Fade out and remove
+    // Polished Sequence for Wave Announcement
     text.add(
-      OpacityEffect.fadeOut(EffectController(duration: 3.0))
-        ..onComplete = () => text.removeFromParent(),
+      SequenceEffect([
+        // Initial state
+        OpacityEffect.to(0.0, EffectController(duration: 0.0)),
+        // Fade in
+        OpacityEffect.fadeIn(EffectController(duration: 0.2)),
+        // Stay visible for 0.8 seconds
+        OpacityEffect.fadeIn(EffectController(duration: 0.8)),
+        // Fade out
+        OpacityEffect.fadeOut(EffectController(duration: 0.5)),
+      ], onComplete: () => text.removeFromParent()),
     );
 
-    text.add(ScaleEffect.by(Vector2.all(1.2), EffectController(duration: 3.0)));
+    // Overlapping Scale effect
+    text.add(
+      ScaleEffect.to(
+        Vector2.all(1.2),
+        EffectController(duration: 1.5, curve: Curves.easeOut),
+      ),
+    );
   }
 
   void _spawnWave() {

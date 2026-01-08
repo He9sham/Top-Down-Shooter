@@ -148,7 +148,11 @@ class GameHud extends PositionComponent with HasGameReference<WaveFallGame> {
     }
 
     // Wave text
-    _waveText.text = 'Wave: $currentWave | Enemies: $enemiesRemaining';
+    final waveStr = 'Wave: $currentWave';
+    final enemiesStr = enemiesRemaining > 0
+        ? 'Enemies: $enemiesRemaining'
+        : 'WAVE CLEARED!';
+    _waveText.text = '$waveStr | $enemiesStr';
 
     // Boss Health
     final bosses = game.world.children.whereType<BossEnemy>().toList();
@@ -211,8 +215,8 @@ class PauseButton extends PositionComponent
       ..style = PaintingStyle.fill;
 
     // Draw pause icon (two vertical bars)
-    canvas.drawRect(Rect.fromLTWH(10, 10, 6, 20), paint);
-    canvas.drawRect(Rect.fromLTWH(24, 10, 6, 20), paint);
+    canvas.drawRect(const Rect.fromLTWH(10, 10, 6, 20), paint);
+    canvas.drawRect(const Rect.fromLTWH(24, 10, 6, 20), paint);
 
     // Draw border
     final borderPaint = Paint()

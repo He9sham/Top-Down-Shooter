@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_games/game/config/game_config.dart';
 import 'package:flutter_games/game/effects/particle_effects.dart';
 import 'package:flutter_games/game/wavefall_game.dart';
@@ -17,7 +20,7 @@ class PlayerSpriteComponent extends SpriteComponent
   // Movement tuning (mobile-friendly)
   static const double _speed = 260.0;
 
-  // World bounds (should match world size in WaveFallGame)
+  // World bounds
   static const double _worldHalfSize = 1000.0;
 
   // Base Stats
@@ -39,8 +42,14 @@ class PlayerSpriteComponent extends SpriteComponent
   static const double _trailInterval = 0.05;
 
   // Rotation smoothing
-  double _currentAngle = -pi / 2; // Start pointing up
+  double _currentAngle = -pi / 2;
   static const double _rotationSpeed = 8.0;
+
+  // Movement smoothing
+  Vector2 _velocity = Vector2.zero();
+  static const double _friction = 10.0;
+  static const double _acceleration = 15.0;
+  static const double _deadZone = 0.15;
 
   // Getters for UI
   double get currentHealth => _currentHealth;
@@ -50,8 +59,6 @@ class PlayerSpriteComponent extends SpriteComponent
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-
-    // Load player sprite
     sprite = await game.loadSprite('player/player.png');
   }
 
@@ -65,20 +72,22 @@ class PlayerSpriteComponent extends SpriteComponent
   }
 
   void _handleMovement(double dt) {
-    final movement = joystick.relativeDelta;
+    var delta = joystick.relativeDelta;
 
-    // No input
-    if (movement.isZero()) return;
+    if (delta.length < _deadZone) {
+      final frictionFactor = 1.0 - (_friction * dt);
+      _velocity.scale(frictionFactor.clamp(0.0, 1.0));
+    } else {
+      final targetVelocity = delta.normalized() * (_speed * _speedMultiplier);
+      _velocity.lerp(targetVelocity, _acceleration * dt);
+    }
 
-    // Update last direction only when moving
-    _lastDirection = movement.normalized();
+    position.add(_velocity * dt);
 
-    // Normalize for consistent speed in all directions
-    final currentSpeed = _speed * _speedMultiplier;
-    final delta = movement.normalized() * currentSpeed * dt;
-    position.add(delta);
+    if (delta.length > _deadZone) {
+      _lastDirection = delta.normalized();
+    }
 
-    // Clamp inside world bounds
     position.clamp(
       Vector2(-_worldHalfSize + width / 2, -_worldHalfSize + height / 2),
       Vector2(_worldHalfSize - width / 2, _worldHalfSize - height / 2),
@@ -86,32 +95,22 @@ class PlayerSpriteComponent extends SpriteComponent
   }
 
   void _handleRotation(double dt) {
-    // Calculate target angle based on movement direction
+    if (_lastDirection.isZero()) return;
     final targetAngle = atan2(_lastDirection.y, _lastDirection.x) + pi / 2;
-
-    // Smoothly interpolate to target angle
     final angleDiff = _normalizeAngle(targetAngle - _currentAngle);
     _currentAngle += angleDiff * _rotationSpeed * dt;
     _currentAngle = _normalizeAngle(_currentAngle);
-
-    // Apply rotation
     angle = _currentAngle;
   }
 
   double _normalizeAngle(double angle) {
-    while (angle > pi) {
-      angle -= 2 * pi;
-    }
-    while (angle < -pi) {
-      angle += 2 * pi;
-    }
+    while (angle > pi) angle -= 2 * pi;
+    while (angle < -pi) angle += 2 * pi;
     return angle;
   }
 
   void _handleShooting(double dt) {
     _timeSinceLastShot += dt;
-
-    // Apply fire rate multiplier (higher multiplier = faster fire rate / lower interval)
     final currentFireInterval = GameConfig.fireRate / _fireRateMultiplier;
 
     if (_timeSinceLastShot >= currentFireInterval) {
@@ -129,16 +128,40 @@ class PlayerSpriteComponent extends SpriteComponent
         damage: _baseDamage * _damageMultiplier,
       ),
     );
+
+    _createMuzzleFlash();
+
+    game.camera.viewfinder.add(
+      MoveEffect.by(
+        Vector2(1.5, 1.5),
+        EffectController(duration: 0.04, reverseDuration: 0.04),
+      ),
+    );
+  }
+
+  void _createMuzzleFlash() {
+    final muzzlePos = _lastDirection * (height / 2);
+    final flash = CircleComponent(
+      radius: 4,
+      position: muzzlePos + (size / 2),
+      paint: Paint()..color = Colors.white,
+      anchor: Anchor.center,
+    );
+    add(flash);
+    flash.add(
+      OpacityEffect.fadeOut(EffectController(duration: 0.15))
+        ..onComplete = () => flash.removeFromParent(),
+    );
+    flash.add(
+      ScaleEffect.by(Vector2.all(2.0), EffectController(duration: 0.1)),
+    );
   }
 
   void _handleEngineTrail(double dt) {
     _timeSinceLastTrail += dt;
-
     if (_timeSinceLastTrail >= _trailInterval &&
         !joystick.relativeDelta.isZero()) {
       _timeSinceLastTrail = 0.0;
-
-      // Spawn trail particle behind the ship
       final trailPosition = position - (_lastDirection * (height / 2));
       game.world.add(
         ParticleEffects.createEngineTrail(
@@ -149,25 +172,20 @@ class PlayerSpriteComponent extends SpriteComponent
     }
   }
 
-  /// Reset player state
   void reset() {
     _currentHealth = _maxHealth;
     _timeSinceLastShot = 0.0;
     _timeSinceLastTrail = 0.0;
     position = Vector2.zero();
     _currentAngle = -pi / 2;
+    _velocity = Vector2.zero();
+    _lastDirection = Vector2(0, -1);
   }
 
-  /// Take damage and trigger visual feedback
   void takeDamage(double damage) {
     _currentHealth -= damage;
     if (_currentHealth < 0) _currentHealth = 0;
-
-    // Trigger screen shake
-    // Note: This would be called from the game when implementing collision
   }
-
-  // --- UPGRADE METHODS ---
 
   void upgradeHealth(double percent) {
     final increase = _maxHealth * percent;
