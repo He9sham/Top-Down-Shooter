@@ -455,7 +455,7 @@ class _SettingsOverlayState extends State<SettingsOverlay> {
           value: currentValue,
           onChanged: onChanged,
           activeThumbColor: Colors.orangeAccent,
-          activeColor: Colors.orangeAccent.withValues(alpha: 0.3),
+          activeTrackColor: Colors.orangeAccent.withValues(alpha: 0.3),
         ),
       ],
     );

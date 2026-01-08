@@ -31,16 +31,16 @@ class FadingTextComponent extends TextComponent
   });
 
   @override
-  double get opacity => paint.color.opacity;
+  double get opacity => paint.color.a;
 
   @override
   set opacity(double value) {
-    paint.color = paint.color.withOpacity(value);
+    paint.color = paint.color.withValues(alpha: value);
     // Also update the text renderer if it's a TextPaint to ensure the text actually fades
     if (textRenderer is TextPaint) {
       final style = (textRenderer as TextPaint).style;
       textRenderer = TextPaint(
-        style: style.copyWith(color: style.color?.withOpacity(value)),
+        style: style.copyWith(color: style.color?.withValues(alpha: value)),
       );
     }
   }
