@@ -29,14 +29,16 @@ class GameView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GameWidget<WaveFallGameEnhanced>(
-        game: WaveFallGameEnhanced(),
-        overlayBuilderMap: {
-          'PauseMenu': (context, game) => PauseMenu(game: game),
-          'UpgradeMenu': (context, game) => UpgradeMenu(game: game),
-          'GameOverMenu': (context, game) => GameOverMenu(game: game),
-        },
+    return SafeArea(
+      child: Scaffold(
+        body: GameWidget<WaveFallGameEnhanced>(
+          game: WaveFallGameEnhanced(),
+          overlayBuilderMap: {
+            'PauseMenu': (context, game) => PauseMenu(game: game),
+            'UpgradeMenu': (context, game) => UpgradeMenu(game: game),
+            'GameOverMenu': (context, game) => GameOverMenu(game: game),
+          },
+        ),
       ),
     );
   }

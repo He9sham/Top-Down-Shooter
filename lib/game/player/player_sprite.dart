@@ -180,7 +180,7 @@ class PlayerSpriteComponent extends SpriteComponent
     _currentHealth = _maxHealth;
     _timeSinceLastShot = 0.0;
     _timeSinceLastTrail = 0.0;
-    position = Vector2.zero();
+    position = game.camera.viewport.virtualSize / 2;
     _currentAngle = -pi / 2;
     _velocity = Vector2.zero();
     _lastDirection = Vector2(0, -1);

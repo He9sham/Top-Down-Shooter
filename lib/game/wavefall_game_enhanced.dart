@@ -121,6 +121,7 @@ class WaveFallGameEnhanced extends WaveFallGame {
 
     // Player with sprite
     player = PlayerSpriteComponent(joystick: joystick);
+    player.position = camera.viewport.virtualSize / 2;
     await world.add(player);
 
     // Camera follow
@@ -263,7 +264,10 @@ class WaveFallGameEnhanced extends WaveFallGame {
           shadows: [Shadow(color: Colors.cyan, blurRadius: 10)],
         ),
       ),
-      position: Vector2(camera.viewport.size.x / 2, camera.viewport.size.y / 3),
+      position: Vector2(
+        camera.viewport.virtualSize.x / 2,
+        camera.viewport.virtualSize.y / 3,
+      ),
       anchor: Anchor.center,
     );
 
@@ -330,10 +334,11 @@ class WaveFallGameEnhanced extends WaveFallGame {
   }
 
   void _spawnEnemy(double healthMult, double speedMult, double damageMult) {
-    // Random position around the player
+    // Random position around the player based on virtual size
     final rand = Random();
     final angle = rand.nextDouble() * 2 * pi;
-    final distance = 500.0 + rand.nextDouble() * 200.0;
+    final distance =
+        camera.viewport.virtualSize.length * 0.7 + rand.nextDouble() * 200.0;
 
     final spawnPos =
         player.position + Vector2(cos(angle), sin(angle)) * distance;

@@ -1,18 +1,23 @@
 import 'dart:async';
 
+import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
-import 'package:flutter/material.dart'; // For Colors
+import 'package:flutter/material.dart'
+    hide Viewport; // Resolve Viewport conflict
 import 'package:flutter_games/game/player/player.dart';
 import 'package:flutter_games/game/upgrades/upgrade.dart';
 import 'package:flutter_games/game/upgrades/upgrade_manager.dart';
 
+extension ViewportExtension on Viewport {
+  Vector2 get virtualSize => size;
+}
+
 class WaveFallGame extends FlameGame {
-  WaveFallGame()
-    : super(
-        camera: CameraComponent.withFixedResolution(width: 400, height: 800),
-        world: World(),
-      );
+  WaveFallGame();
+
+  /// The virtual resolution of the game world.
+  Vector2 get virtualSize => camera.viewport.virtualSize;
 
   bool _isDebugMode = false;
 
@@ -31,6 +36,7 @@ class WaveFallGame extends FlameGame {
 
   @override
   FutureOr<void> onLoad() async {
+    camera.viewport = FixedResolutionViewport(resolution: Vector2(360, 640));
     _upgradeManager = UpgradeManager();
 
     // Temporary background
