@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_games/game/helper/spacing.dart';
 import 'package:flutter_games/game/upgrades/upgrade.dart';
 import 'package:flutter_games/game/wavefall_game.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UpgradeMenu extends StatelessWidget {
   final WaveFallGame game;
@@ -20,7 +22,7 @@ class UpgradeMenu extends StatelessWidget {
           border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         ),
         width: MediaQuery.of(context).size.width * 0.9,
-        height: 400,
+        height: 400.h,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -33,12 +35,12 @@ class UpgradeMenu extends StatelessWidget {
                 letterSpacing: 2.0,
               ),
             ),
-            const SizedBox(height: 10),
+            verticalSpace(10),
             const Text(
               'Choose an upgrade',
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
-            const SizedBox(height: 30),
+            verticalSpace(30),
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -62,7 +64,7 @@ class UpgradeMenu extends StatelessWidget {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Container(
-          width: 150,
+          width: 150.w,
           margin: const EdgeInsets.symmetric(horizontal: 5),
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
@@ -74,7 +76,7 @@ class UpgradeMenu extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(upgrade.icon, size: 50, color: Colors.amberAccent),
-              const SizedBox(height: 15),
+              verticalSpace(15),
               Text(
                 upgrade.name,
                 textAlign: TextAlign.center,
@@ -84,7 +86,7 @@ class UpgradeMenu extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 10),
+              verticalSpace(10),
               Text(
                 upgrade.description,
                 textAlign: TextAlign.center,
@@ -117,7 +119,7 @@ class UpgradeMenuOverlay extends StatelessWidget {
           border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         ),
         width: MediaQuery.of(context).size.width * 0.9,
-        height: 400,
+        height: 400.h,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -130,12 +132,12 @@ class UpgradeMenuOverlay extends StatelessWidget {
                 letterSpacing: 2.0,
               ),
             ),
-            const SizedBox(height: 10),
+            verticalSpace(10),
             const Text(
               'Choose an upgrade',
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
-            const SizedBox(height: 30),
+            verticalSpace(30),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -156,7 +158,7 @@ class UpgradeMenuOverlay extends StatelessWidget {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Container(
-          width: 150,
+          width: 150.w,
           margin: const EdgeInsets.symmetric(horizontal: 5),
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
@@ -168,7 +170,7 @@ class UpgradeMenuOverlay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(upgrade.icon, size: 50, color: Colors.amberAccent),
-              const SizedBox(height: 15),
+              verticalSpace(15),
               Text(
                 upgrade.name,
                 textAlign: TextAlign.center,
@@ -178,7 +180,7 @@ class UpgradeMenuOverlay extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 10),
+              verticalSpace(10),
               Text(
                 upgrade.description,
                 textAlign: TextAlign.center,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_games/game/game_enums.dart';
+import 'package:flutter_games/game/helper/spacing.dart';
 import 'package:flutter_games/game/wavefall_game_enhanced.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PauseMenu extends StatelessWidget {
   final WaveFallGameEnhanced game;
@@ -15,14 +17,14 @@ class PauseMenu extends StatelessWidget {
         color: Colors.black.withValues(alpha: 0.7),
         child: Center(
           child: Container(
-            width: 320,
+            width: 320.w,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: const Color(0xFF1E1E2C),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: Colors.cyan.withValues(alpha: 0.5),
-                width: 1.5,
+                width: 1.5.w,
               ),
               boxShadow: [
                 BoxShadow(
@@ -40,24 +42,24 @@ class PauseMenu extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
+                Text(
                   'PAUSED',
                   style: TextStyle(
                     color: Colors.cyan,
-                    fontSize: 32,
+                    fontSize: 32.sp,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 3,
                     shadows: [Shadow(color: Colors.cyan, blurRadius: 10)],
                   ),
                 ),
-                const SizedBox(height: 40),
+                verticalSpace(40),
                 _buildMenuButton(
                   label: 'RESUME',
                   icon: Icons.play_arrow_rounded,
                   onPressed: () => game.changeState(GameState.playing),
                   primaryColor: Colors.cyan,
                 ),
-                const SizedBox(height: 16),
+                verticalSpace(16),
                 _buildMenuButton(
                   label: 'RESTART',
                   icon: Icons.refresh_rounded,
@@ -67,7 +69,7 @@ class PauseMenu extends StatelessWidget {
                   },
                   primaryColor: Colors.white,
                 ),
-                const SizedBox(height: 16),
+                verticalSpace(16),
                 _buildMenuButton(
                   label: 'EXIT',
                   icon: Icons.exit_to_app_rounded,
@@ -120,12 +122,12 @@ class PauseMenu extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 24),
-            const SizedBox(width: 12),
+            Icon(icon, size: 24.sp),
+            horizontalSpace(kHorizontalSpaceLarge),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1,
               ),
