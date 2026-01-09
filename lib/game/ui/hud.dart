@@ -1,10 +1,10 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_games/game/enemies/boss_enemy.dart';
 import 'package:flutter_games/game/game_enums.dart';
 import 'package:flutter_games/game/player/player_sprite.dart';
 import 'package:flutter_games/game/wavefall_game.dart';
-import 'package:flutter_games/game/enemies/boss_enemy.dart';
 
 /// Enhanced HUD component with health bar and wave counter
 class GameHud extends PositionComponent with HasGameReference<WaveFallGame> {
@@ -39,7 +39,7 @@ class GameHud extends PositionComponent with HasGameReference<WaveFallGame> {
 
     // Pause Button
     _pauseButton = PauseButton()
-      ..position = Vector2(viewportWidth - 60, _padding);
+      ..position = Vector2(viewportWidth - 50, _padding);
     add(_pauseButton);
 
     // Player Health bar background
@@ -107,7 +107,7 @@ class GameHud extends PositionComponent with HasGameReference<WaveFallGame> {
     // Boss Health Bar (Hidden by default)
     final bossX = (viewportWidth - _bossBarWidth) / 2;
     _bossHealthBarBackground = RectangleComponent(
-      position: Vector2(bossX, 60),
+      position: Vector2(bossX, 70),
       size: Vector2(_bossBarWidth, _bossBarHeight),
       paint: Paint()..color = Colors.black.withValues(alpha: 0.5),
     );
